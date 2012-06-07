@@ -85,61 +85,39 @@ module Ow2mirror
       puts "-" * message.length
       puts
 
-      puts "> Source Service URL, current is '#{@attributes['source']['url']}' :"
-      input = stdin.gets.chomp
-      if !input.empty?
-        @attributes['source']['url'] = input
+      @attributes['source']['url'] = ask("Source Service URL, current is '#{@attributes['source']['url']}'") do |q|
+        q.default = @attributes['source']['url']
       end
-      puts "< '#{@attributes['source']['url']}'"
 
-      puts "> Source Service type, current is '#{@attributes['source']['type']}' :"
-      input = stdin.gets.chomp
-      if !input.empty?
-        @attributes['source']['type'] = input
+      @attributes['source']['type'] = ask("Source Service type, current is '#{@attributes['source']['type']}' :") do |q|
+        q.default = @attributes['source']['type']
       end
-      puts "< '#{@attributes['source']['type']}'"
 
-      puts "> Source Service login, current is '#{@attributes['source']['username']}' :"
-      input = stdin.gets.chomp
-      if !input.empty?
-        @attributes['source']['username'] = input
+      @attributes['source']['username'] = ask("Source Service login, current is '#{@attributes['source']['username']}' :") do |q|
+        q.default = @attributes['source']['username']
       end
-      puts "< '#{@attributes['source']['username']}'"
 
-      puts "> Source Service password, current is '#{@attributes['source']['password']}' :"
-      input = stdin.gets.chomp
-      if !input.empty?
-        @attributes['source']['password'] = input
+      @attributes['source']['password'] = ask("Source Service password, current is '#{@attributes['source']['password']}' :") do |q|
+        q.default = @attributes['source']['password']
+        q.echo = '*'
       end
-      puts "< '#{@attributes['source']['password']}'"
 
-      puts "> Target Service URL, current is '#{@attributes['destination']['url']}' :"
-      input = stdin.gets.chomp
-      if !input.empty?
-        @attributes['destination']['url'] = input
+      @attributes['destination']['url'] = ask("Destination Service URL, current is '#{@attributes['destination']['url']}'") do |q|
+        q.default = @attributes['destination']['url']
       end
-      puts "< '#{@attributes['destination']['url']}'"
 
-      puts "Target Service type, current is '#{@attributes['destination']['type']}' :"
-      input = stdin.gets.chomp
-      if !input.empty?
-        @attributes['destination']['type'] = input
+      @attributes['destination']['type'] = ask("Destination Service type, current is '#{@attributes['destination']['type']}' :") do |q|
+        q.default = @attributes['destination']['type']
       end
-      puts "< '#{@attributes['destination']['type']}'"
 
-      puts "> Target Service login, current is '#{@attributes['destination']['username']}' :"
-      input = stdin.gets.chomp
-      if !input.empty?
-        @attributes['destination']['username'] = input
+      @attributes['destination']['username'] = ask("Destination Service login, current is '#{@attributes['destination']['username']}' :") do |q|
+        q.default = @attributes['destination']['username']
       end
-      puts "< '#{@attributes['destination']['username']}'"
 
-      puts "Target Service password, current is '#{@attributes['destination']['password']}' :"
-      input = stdin.gets.chomp
-      if !input.empty?
-        @attributes['destination']['password'] = input
+      @attributes['destination']['password'] = ask("Destination Service password, current is '#{@attributes['destination']['password']}' :") do |q|
+        q.default = @attributes['destination']['password']
+        q.echo = '*'
       end
-      puts "< '#{@attributes['destination']['password']}'"
 
       puts ""
       message = "Local configuration"
@@ -147,12 +125,11 @@ module Ow2mirror
       puts "-" * message.length
       puts ""
 
-      puts "Define the mirror root folder (relative to your home #{ENV['HOME']}), current is '#{@attributes['path']}' :"
-      input = stdin.gets.chomp
-      if !input.empty?
-        @attributes['path'] = input
+      @attributes['path'] = ask("Define the mirror root folder (relative to your home #{ENV['HOME']}), current is '#{@attributes['path']}' :") do |q|
+        q.default = @attributes['path']
       end
-      puts "< '#{@attributes['path']}'"
+
+      # TODO : Display and validate before save
 
       save
     end

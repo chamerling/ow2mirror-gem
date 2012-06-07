@@ -74,41 +74,35 @@ module Ow2mirror
 
         client = Ow2mirror::Client::GitoriousClient.new({:url => config.attributes['source']['url']})
         projects = client.projects
-        puts "> Which source project to mirror?"
 
-        begin
-          puts "> Possible source values are:"
-          puts "> #{CSV.generate_line(projects)}"
-          project = stdin.gets.chomp
-        end while project.length == 0 or not projects.include?(project)
-        properties[:name] = project
-        puts "< Mirroring project '#{project}'"
+        choose do |menu|
+          menu.prompt = "Which source project to mirror?"
+          menu.choices(*projects) do |choice|
+            properties[:name] = choice
+            say "Selected project is #{choice}"
+          end
+        end
 
-        repos = client.repositories(project)
+        repos = client.repositories(properties[:name])
         repo_names = []
         repos.each do |input|
           repo_names << input[:name]
         end
-        puts "> Which source repositories do you want to mirror (possible value are : * for all and CSV value to choose some)"
+
+        # TODO: Multiple choices with highline
+        puts "Which source repositories do you want to mirror (possible value are : * for all and CSV value to choose some)"
         begin
           puts "Source values are:"
-          puts "> #{CSV.generate_line(repo_names)}"
+          puts " - #{CSV.generate_line(repo_names)}"
           repositories = stdin.gets.chomp
         end while repositories.length == 0
         properties[:repositories] = repositories
-        puts "< Mirroring repositories '#{repositories}'"
 
-        puts "> Target project:"
-        begin
-          target = stdin.gets.chomp
-        end while target.length == 0
-        properties[:target] = target
-        puts "< Target project is '#{target}'"
+        properties[:target] = ask("Target project?")
 
-        puts "> Prefix of the target repositories ('cause we host many in the same target project/org...):"
-        prefix = stdin.gets.chomp
-        properties[:prefix] = prefix
-        puts "< Target project prefix '#{prefix}'"
+        properties[:prefix] = ask("Prefix of the target repositories ('cause we host many in the same target project/org...)")
+
+        puts properties
 
         create_mirror(config, properties)
       end

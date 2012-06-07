@@ -19,7 +19,15 @@ Gem::Specification.new do |gem|
   gem.version       = "0.0.1"
 
   gem.add_dependency('multi_json', "~> 1.0.3")
+
+  # Nice HTTP client library
   gem.add_dependency('httparty', "~> 0.8.3")
+
+  # Input stream management
+  gem.add_dependency('highline', "~> 1.6.12")
+
+  # XMLparsing (require xml)
+  gem.add_dependency('libxml-ruby', "~> 2.3.2")
 
   gem.add_development_dependency('mocha', "~> 0.9.9")
   gem.add_development_dependency('rake', "~> 0.9.2")

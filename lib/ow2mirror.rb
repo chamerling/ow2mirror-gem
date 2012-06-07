@@ -10,7 +10,8 @@ require 'fileutils'
 require 'multi_json'
 require 'httparty'
 require 'open-uri'
-require 'xml'
+#require 'xml'
+require 'highline/import'
 
 # Setting the LOADPATH
 $:.unshift File.join(File.dirname(__FILE__), *%w[.. lib])
