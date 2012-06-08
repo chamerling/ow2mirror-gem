@@ -38,7 +38,7 @@ module Ow2mirror
         end
 
         def run
-          puts "sh: #{command}"
+          puts "Running sh command: '#{command}'"
 
           out = err = nil
           Open3.popen3(*@command) do |_, pout, perr|

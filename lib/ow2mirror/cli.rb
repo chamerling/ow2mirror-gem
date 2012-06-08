@@ -107,6 +107,9 @@ module Ow2mirror
         create_mirror(config, properties)
       end
 
+      #
+      # Create mirror based on configuration and properties. Can be used directly or through the create method.
+      #
       def create_mirror(config, properties)
         project = Ow2mirror::Project.new(config, properties)
         project.create_mirror
