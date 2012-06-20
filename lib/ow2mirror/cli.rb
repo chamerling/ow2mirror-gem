@@ -105,6 +105,7 @@ module Ow2mirror
         project_prefix = ask("Prefix of the target repositories ('cause we host many in the same target project/org...)")
 
         create_mirror(config, project_name, project_prefix, project_repos, project_source, project_target)
+        output "Done!"
 
       end
 
