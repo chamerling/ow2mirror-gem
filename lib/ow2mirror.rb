@@ -18,9 +18,9 @@ $:.unshift File.join(File.dirname(__FILE__), *%w[.. lib])
 
 require "ow2mirror/cli"
 require "ow2mirror/config"
-require "ow2mirror/config"
 require "ow2mirror/command"
 require "ow2mirror/project"
+require "ow2mirror/report"
 require "ow2mirror/workspace"
 require "ow2mirror/client/client"
 require "ow2mirror/client/gitorious_client"

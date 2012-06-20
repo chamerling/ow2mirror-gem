@@ -18,6 +18,8 @@ module Ow2mirror
     # The projects folder
     PROJECTS_FOLDER = "projects"
 
+    REPORTS_FOLDER = "reports"
+
     attr_reader :attributes
 
     def initialize
@@ -92,6 +94,13 @@ module Ow2mirror
     end
 
     #
+    # The reports folder
+    #
+    def reports_folder
+      File.join(workspace_folder, REPORTS_FOLDER)
+    end
+
+    #
     # Create the workspace if it does not exists and laod it
     #
     def create
@@ -110,11 +119,21 @@ module Ow2mirror
           :version => "#{Ow2mirror::VERSION}"
       }
 
-      puts "Creating projects and logs folders under #{workspace_folder}"
-      mkdir projects_folder
-      mkdir logs_folder
+      puts "Creating work folders under #{workspace_folder}"
+      mkdir_p projects_folder
+      mkdir_p logs_folder
+      mkdir_p reports_folder
       save
-      puts "Done"
+      puts "Done!"
+    end
+
+    #
+    # Store a report to the reports folder
+    #
+    def save_report(hash)
+      id = "report-#{Time.now.strftime("%Y%m%d-%H:%M:%S")}.md"
+      puts "Saving mirror report to #{id}"
+      File.open(File.join(reports_folder, id), 'w') { |f| f.write(Ow2mirror::Report.generate_mirror(hash)) }
     end
 
     #

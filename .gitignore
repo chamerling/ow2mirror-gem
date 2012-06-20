@@ -19,3 +19,5 @@ tmp
 bin/projects
 bin/logs
 bin/workspace.json
+bin/reports
+

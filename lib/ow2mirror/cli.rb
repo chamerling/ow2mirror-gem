@@ -26,13 +26,12 @@ module Ow2mirror
       end
 
       def overview
-        output "Invalid command, type 'gitmirror help' to get help..."
+        output "Invalid command, type 'ow2mirror help' to get help..."
       end
 
       def delegate(command, major, minor)
 
         return install if command == 'install'
-        return configure if command == 'configure'
         return mirror if command == 'mirror'
         return create if command == 'create'
 
@@ -43,6 +42,7 @@ module Ow2mirror
         # Test methods
         return test if command == 'test'
 
+        # default
         return help
       end
 
@@ -65,7 +65,7 @@ module Ow2mirror
         # TODO : check if the workspace has been created before...
 
         output "Creating a new project mirror..."
-        project_name = ask("Project Name?")
+        project_name = ask("Project Name ?")
 
         config = Ow2mirror::Config.new(Ow2mirror.workspace, project_name)
         config.create
@@ -105,6 +105,7 @@ module Ow2mirror
         project_prefix = ask("Prefix of the target repositories ('cause we host many in the same target project/org...)")
 
         create_mirror(config, project_name, project_prefix, project_repos, project_source, project_target)
+
       end
 
       #
@@ -124,13 +125,21 @@ module Ow2mirror
       def mirror
         puts "Mirroring projects..."
 
-        # Get all the projects and iterate over
+        # TODO Can not mirror if no workspace nor projects already configured...
+
+        reports = []
+
         ws = Ow2mirror.workspace
         ws.projects.each do |p|
           puts "Mirroring project #{p}..."
+
+          start = Time.now
           project = ws.project(p)
           project.mirror
+          reports << {:project => p, :start_time => "#{start}", :end_time => "#{Time.now}", :status => "OK"}
         end
+
+        Ow2mirror.workspace.save_report(reports)
       end
 
       def version
