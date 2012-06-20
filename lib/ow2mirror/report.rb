@@ -11,15 +11,15 @@ module Ow2mirror
     #
     def Report.generate_mirror(hash)
 
-      json = MultiJson.encode(hash)
       time = Time.now
-      id = "report-#{time.strftime("%Y%m%d-%H:%M:%S")}.md"
-
-      report = "# Mirroring report (generated at #{time})"
+      report = "# Mirroring report"
+      report << "\n\n"
+      report << "- Type : Mirror\n"
+      report << "- Generated at : #{time}"
+      report << "\n\n"
+      report << "## Project logs"
       report << "\n"
-      report << "## Projects logs"
-      report << "\n"
-      report << json
+      report << MultiJson.encode(hash)
 
     end
 

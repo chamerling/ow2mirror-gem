@@ -130,9 +130,9 @@ module Ow2mirror
     #
     # Store a report to the reports folder
     #
-    def save_report(hash)
-      id = "report-#{Time.now.strftime("%Y%m%d-%H:%M:%S")}.md"
-      puts "Saving mirror report to #{id}"
+    def save_report(project_name, hash)
+      id = "report-#{project_name}-#{Time.now.strftime("%Y%m%d-%H:%M:%S")}.md"
+      puts "Saving mirror report for project #{project_name} to #{id}"
       File.open(File.join(reports_folder, id), 'w') { |f| f.write(Ow2mirror::Report.generate_mirror(hash)) }
     end
 

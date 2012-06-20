@@ -127,8 +127,6 @@ module Ow2mirror
 
         # TODO Can not mirror if no workspace nor projects already configured...
 
-        reports = []
-
         ws = Ow2mirror.workspace
         ws.projects.each do |p|
           puts "Mirroring project #{p}..."
@@ -136,10 +134,10 @@ module Ow2mirror
           start = Time.now
           project = ws.project(p)
           project.mirror
-          reports << {:project => p, :start_time => "#{start}", :end_time => "#{Time.now}", :status => "OK"}
+          Ow2mirror.workspace.save_report(p,
+              {:project => p, :type => "mirror", :start_time => "#{start}", :end_time => "#{Time.now}", :status => "OK"})
         end
 
-        Ow2mirror.workspace.save_report(reports)
       end
 
       def version
