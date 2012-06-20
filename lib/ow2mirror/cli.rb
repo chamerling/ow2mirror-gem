@@ -10,9 +10,6 @@ module Ow2mirror
       # Main entry point
       #
       def execute(*args)
-
-        # Gitmirror.foo
-
         command = args.shift
         major = args.shift
         minor = args.empty? ? nil : args.join(' ')
@@ -34,8 +31,7 @@ module Ow2mirror
 
       def delegate(command, major, minor)
 
-        check_configuration
-
+        return install if command == 'install'
         return configure if command == 'configure'
         return mirror if command == 'mirror'
         return create if command == 'create'
@@ -50,40 +46,48 @@ module Ow2mirror
         return help
       end
 
-      # Check that we have a configuration file with required params
-      def check_configuration
-
-
-      end
-
-      def configure
-        Ow2mirror.config.configure
+      #
+      # Create all the required stuff for the Mirror
+      #
+      def install
+        puts "Creating the default configuration files..."
+        ws = Ow2mirror.workspace
+        puts ws.create
+        puts "Workspace created under #{ws.workspace_folder}"
+        puts ws.display
       end
 
       #
-      # Create a new mirror for the given input project
+      # Create a new mirror (project) for the given input project
       #
       def create
-        config = Ow2mirror.config
 
-        properties = {
-            :name => "",
-            :prefix => "",
-            :repositories => "*"
-        }
+        # TODO : check if the workspace has been created before...
+
+        output "Creating a new project mirror..."
+        project_name = ask("Project Name?")
+
+        config = Ow2mirror::Config.new(Ow2mirror.workspace, project_name)
+        config.create
+        config.configure
 
         client = Ow2mirror::Client::GitoriousClient.new({:url => config.attributes['source']['url']})
+        puts "Getting available projects from #{config.attributes['source']['url']}, please wait..."
         projects = client.projects
 
+        project_source = nil
         choose do |menu|
           menu.prompt = "Which source project to mirror?"
           menu.choices(*projects) do |choice|
-            properties[:name] = choice
+            project_source = choice
             say "Selected project is #{choice}"
           end
         end
 
-        repos = client.repositories(properties[:name])
+        fail("Project source can not be null!") if project_source.nil?
+
+        puts "Getting repositories from source system, please wait..."
+        repos = client.repositories(project_source)
         repo_names = []
         repos.each do |input|
           repo_names << input[:name]
@@ -94,25 +98,39 @@ module Ow2mirror
         begin
           puts "Source values are:"
           puts " - #{CSV.generate_line(repo_names)}"
-          repositories = stdin.gets.chomp
-        end while repositories.length == 0
-        properties[:repositories] = repositories
+          project_repos = stdin.gets.chomp
+        end while project_repos.length == 0
 
-        properties[:target] = ask("Target project?")
+        project_target = ask("Target project (organisation for github)?")
+        project_prefix = ask("Prefix of the target repositories ('cause we host many in the same target project/org...)")
 
-        properties[:prefix] = ask("Prefix of the target repositories ('cause we host many in the same target project/org...)")
-
-        puts properties
-
-        create_mirror(config, properties)
+        create_mirror(config, project_name, project_prefix, project_repos, project_source, project_target)
       end
 
       #
       # Create mirror based on configuration and properties. Can be used directly or through the create method.
       #
-      def create_mirror(config, properties)
-        project = Ow2mirror::Project.new(config, properties)
+      def create_mirror(config, project_name, project_prefix, project_repos, project_source, project_target)
+        config.save
+        project = Ow2mirror.workspace.project(project_name)
+        project.create(project_source, project_target, project_prefix, project_repos)
         project.create_mirror
+      end
+
+      #
+      # Mirror repositories from the local folder. This is used when mirror has already been created with the create_mirror
+      # method. This is typically called by a cron job.
+      #
+      def mirror
+        puts "Mirroring projects..."
+
+        # Get all the projects and iterate over
+        ws = Ow2mirror.workspace
+        ws.projects.each do |p|
+          puts "Mirroring project #{p}..."
+          project = ws.project(p)
+          project.mirror
+        end
       end
 
       def version
@@ -123,15 +141,17 @@ module Ow2mirror
         output "NOP..."
       end
 
-      def test
-
-      end
-
       def stdin
         $stdin
       end
 
-    end
+      #
+      #
+      #
+      def test
+        puts "TEST METHOD"
+      end
 
+    end
   end
 end

@@ -1,6 +1,9 @@
 #
 # Christophe Hamerling - OW2
 #
+# A project is used to create and access mirror resources, git repositories and really mirror them...
+# It contains all the information about source and destination systems (endpoint, credentials, ...)
+#
 require 'pp'
 
 module Ow2mirror
@@ -8,24 +11,59 @@ module Ow2mirror
 
     include FileUtils
 
-    attr_reader :attributes
+    # Contains the list of repositories which has been mirrored
+    REPOS_FILE_NAME = "repos.json"
 
-    def initialize(config, properties)
-      @config = config
-      @name = properties[:name]
+    # Contains all the project information
+    PROJECT_FILE_NAME = "project.json"
 
-      if @name.nil?
-        fail 'Need to provide the project name' unless @name.nil?
-      end
+    #
+    #
+    #
+    def initialize(workspace, name)
+      fail 'Need to provide the project name' if name.nil?
 
-      # Used for initial creation
-      @prefix = properties[:prefix]
-      @repositories = properties[:repositories]
-      @target_project = properties[:target]
+      @workspace = workspace
+      @name = name
+      @root_folder = workspace.project_folder(@name)
+
+      load_attributes if File.exists?(project_file)
+    end
+
+    #
+    # Create the attributes with default values
+    #
+    def default_attributes
+      @attributes = {
+          :project => @name,
+          :prefix => @prefix,
+          :repositories => @repositories,
+          :source => @source_project,
+          :target => @target_project,
+          :creation_date => "#{Time.now}",
+          :last_mirror => "0",
+          :date => "#{Time.now}",
+      }
+    end
+
+    #
+    # Create all the required resources for a project
+    #
+    def create(source_project, target_project, prefix = '', repositories='*')
+      fail 'Source project should not be null' if source_project.nil?
+      fail 'Target project should not be null' if target_project.nil?
+
+      @prefix = prefix
+      @repositories = repositories
+      @source_project = source_project
+      @target_project = target_project
+
+      puts "Creating the project with prefix '#{prefix}', repositories '#{repositories}', source project '#{source_project}' and target project '#{target_project}'"
 
       bootstrap unless File.directory?(folder) and File.exists?(project_file)
-
       load_attributes
+
+      pp @attributes
     end
 
     #
@@ -34,16 +72,7 @@ module Ow2mirror
     def bootstrap
       puts "Creating folder for project at #{folder}"
       mkdir_p folder
-
-      @attributes = {
-          :project => @name,
-          :prefix => @prefix,
-          :repositories => @repositories,
-          :creation_date => "#{Time.now}",
-          :last_mirror => "0",
-          :date => "#{Time.now}",
-      }
-
+      default_attributes
       save
     end
 
@@ -51,35 +80,49 @@ module Ow2mirror
     # Returns the project folder path
     #
     def folder
-      "#{ENV['HOME']}/#{@config.attributes['path']}/#{@name}/"
+      @root_folder
     end
 
     #
-    # Folder for the given repository name
+    # Folder for the given repository name. We clone the source repository into a REPO.git folder
     #
-    def repository_folder(name)
-      "#{folder}#{name}.git"
+    def repository_folder(repo_name)
+      File.join(folder, "#{repo_name}.git")
     end
 
     #
     # Project configuration file
     #
     def project_file
-      "#{folder}/project.json"
+      File.join(folder, PROJECT_FILE_NAME)
     end
 
+    #
+    # Cache the repositories list into a JSON file
+    #
     def repos_file
-      "#{folder}/repos.json"
+      File.join(folder, REPOS_FILE_NAME)
     end
 
     #
-    #
+    # Really create the mirror:
+    # Get the configuration attributes, clone source repositories and push them to their destination.
     #
     def create_mirror
-
+      puts "## Create mirror for project #{@name}"
       # TODO : Check that all required data is here!
+      load_attributes
 
-      puts ">> Mirroring stuff from #{@name} source project to #{@target_project}..."
+      @config = Ow2mirror::Config.new(@workspace, @name)
+      @config.load_attributes
+
+      puts "Attributes : "
+      pp @attributes
+
+      puts "Configuration : "
+      pp @config
+
+      puts ">> Mirroring stuff from #{@source_project} source project to #{@target_project}..."
       cd(folder)
 
       puts " - Working in the folder #{pwd}"
@@ -91,15 +134,15 @@ module Ow2mirror
       source[:username] = @config.attributes['source']['username']
       source[:password] = @config.attributes['source']['password']
       source[:url] = @config.attributes['source']['url']
-      source[:project] = @config.attributes['source']['project']
+      source[:project] = @attributes['source']
       source_client = Ow2mirror::Client::GitoriousClient.new(source)
-      sources = source_client.repositories(@name)
+      sources = source_client.repositories(@source_project)
 
       target = {}
       target[:username] = @config.attributes['destination']['username']
       target[:password] = @config.attributes['destination']['password']
       target[:url] = @config.attributes['destination']['url']
-      target[:project] = @target_project
+      target[:project] = @attributes['target']
       target_client = Ow2mirror::Client::GithubClient.new(target)
 
       puts " - Retrieved the following repositories from sources"
@@ -110,7 +153,7 @@ module Ow2mirror
       repos = []
 
       # For each repository, create the new one on the destination host
-      # Todo : Filter from user choices...
+      # TODO : Filter from user choices...
       sources.each do |repository|
         cd(folder)
         puts " - Working in the folder #{pwd}"
@@ -130,13 +173,13 @@ module Ow2mirror
           # No folder means that something failed...
         end
 
-        cd(repository_folder(name))
+        cd(folder)
 
         target_repo = (@prefix.nil? or @prefix.empty?) ? name : "#{@prefix}-#{name}"
 
         puts " - Target repository is #{target_repo}"
 
-        remote = target_client.create(@target_project, target_repo, "Official mirror of OW2 repository #{name} hosted at #{git}")
+        remote = target_client.create(@attributes['target'], target_repo, "Official mirror of OW2 repository #{name} hosted at #{git}")
         Ow2mirror::Command.git("remote add #{@config.attributes['destination']['type']} #{remote}")
 
         Ow2mirror::Command.git("config remote.#{@config.attributes['destination']['type']}.mirror true")
@@ -152,6 +195,8 @@ module Ow2mirror
       save
       save_repos repos
 
+      @workspace.add_project(@name)
+
       mirror
     end
 
@@ -159,8 +204,10 @@ module Ow2mirror
     # Mirror all the repositories based on the mirror file generated by the create_mirror method
     #
     def mirror
+      @config = Ow2mirror::Config.new(@workspace, @name)
+      @config.load_attributes
 
-      puts "- Mirroring repositories..."
+      puts "- Mirroring repositories for project #{@name}..."
       repositories.each do |repository|
         puts "Mirroring repository #{repository}..."
         mirror_repository(repository['name'])
@@ -179,15 +226,15 @@ module Ow2mirror
     #
     #
     #
-    def mirror_repository(repository)
-      if File.directory?(repository_folder(repository)) and File.exist?(repository_folder(repository))
-        puts "> cd #{repository_folder(repository)}"
-        cd(repository_folder(repository))
+    def mirror_repository(repository_name)
+      if File.directory?(repository_folder(repository_name)) and File.exist?(repository_folder(repository_name))
+        puts "> cd #{repository_folder(repository_name)}"
+        cd(repository_folder(repository_name))
 
         Ow2mirror::Command.git("fetch --quiet origin")
         Ow2mirror::Command.git("push --quiet #{@config.attributes['destination']['type']}")
       else
-        puts "#{repository} is not valid : Folder not found!"
+        puts "#{repository_name} is not valid : Folder not found!"
       end
     end
 
@@ -195,6 +242,7 @@ module Ow2mirror
     # Load the attributes from the configuration file
     #
     def load_attributes
+      puts "Loading project information from #{project_file}"
       @attributes = MultiJson.decode(File.new(project_file, 'r').read)
     end
 
@@ -210,6 +258,7 @@ module Ow2mirror
     # Save the project information in the project folder
     #
     def save
+      puts "Saving project information to #{project_file}"
       json = MultiJson.encode(@attributes)
       File.open(project_file, 'w') { |f| f.write(json) }
     end

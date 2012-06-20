@@ -1,6 +1,8 @@
 #
 # Christophe Hamerling - ow2.org
 #
+# System command wrapper
+#
 if RUBY_PLATFORM =~ /mswin|mingw/
   begin
     require 'win32/open3'
@@ -38,7 +40,7 @@ module Ow2mirror
         end
 
         def run
-          puts "Running sh command: '#{command}'"
+          puts ">>>>>>> Running sh command: '#{command}'"
 
           out = err = nil
           Open3.popen3(*@command) do |_, pout, perr|

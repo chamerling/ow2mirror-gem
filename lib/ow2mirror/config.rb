@@ -1,25 +1,47 @@
 #
 # Christophe Hamerling - ow2.org
 #
+# The project level configuration
+#
 module Ow2mirror
   class Config
 
-    # Main configuration file
-    FILE = "#{ENV['HOME']}/.gitmirror.conf"
+    FILE_NAME = "config.json"
+
+    include FileUtils
 
     attr_reader :attributes
 
-    def initialize
+    #
+    #
+    #
+    def initialize(workspace, project_name)
+      @workspace = workspace
+      @project_name = project_name
+    end
+
+    #
+    # Current project folder
+    #
+    def folder
+      puts @workspace.class
+      @workspace.project_folder(@project_name)
+    end
+
+    #
+    # Create a new configuration
+    #
+    def create
       bootstrap unless File.exist?(file)
       load_attributes
     end
 
+    #
     # Create the default configuration
+    #
     def bootstrap
-      puts "Creating default configuration file into #{file}..."
+      puts "No local configuration found, creating default configuration file into #{file}..."
       @attributes = {
-          # Where to store things, relative to the user home
-          :path => 'gitmirror',
 
           # The source information URL
           :source => {
@@ -34,12 +56,22 @@ module Ow2mirror
               :type => 'github',
               :username => '',
               :password => ''
-              }
-      }
-      save
+          },
 
-      puts 'Configuring mirror engine...'
-      configure
+          # TODO
+          :notifier => {
+              :type => 'mail',
+              :properties => {
+                  :host => "stmp.gmail.com",
+                  :port => "25",
+                  :login => "chamerling.ebmws@gmail.com",
+                  :password => "XXXX",
+                  :to => "XXXX"
+              }
+          }
+      }
+      mkdir_p folder
+      save
     end
 
     def attributes=(attrs)
@@ -48,7 +80,7 @@ module Ow2mirror
     end
 
     def file
-      FILE
+      File.join(folder, FILE_NAME)
     end
 
     #
@@ -59,11 +91,25 @@ module Ow2mirror
     end
 
     #
+    # Does the configuration file exists?
+    #
+    def exist?
+      File.exist?(file)
+    end
+
+    #
     #
     #
     def save
-      json = MultiJson.encode(attributes)
+      puts "Save to #{file}"
       File.open(file, 'w') { |f| f.write(json) }
+    end
+
+    #
+    # Attributes as JSON
+    #
+    def json
+      MultiJson.encode(attributes)
     end
 
     #
@@ -119,17 +165,14 @@ module Ow2mirror
         q.echo = '*'
       end
 
+      # TODO : Get the notifier from its type and call configure on it
+
       puts ""
-      message = "Local configuration"
+      message = "Summary"
       puts message
       puts "-" * message.length
       puts ""
-
-      @attributes['path'] = ask("Define the mirror root folder (relative to your home #{ENV['HOME']}), current is '#{@attributes['path']}' :") do |q|
-        q.default = @attributes['path']
-      end
-
-      # TODO : Display and validate before save
+      puts json
 
       save
     end

@@ -21,6 +21,7 @@ require "ow2mirror/config"
 require "ow2mirror/config"
 require "ow2mirror/command"
 require "ow2mirror/project"
+require "ow2mirror/workspace"
 require "ow2mirror/client/client"
 require "ow2mirror/client/gitorious_client"
 require "ow2mirror/client/github_client"
@@ -30,8 +31,8 @@ module Ow2mirror
 
   extend self
 
-  def config
-    @config ||= Ow2mirror::Config.new
+  def workspace
+    @workspace ||= Ow2mirror::Workspace.new
   end
 
 end

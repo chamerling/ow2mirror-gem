@@ -6,7 +6,18 @@ module Ow2mirror
 
     class Notify
 
+      def bootstrap(properties)
+        ;
+      end
+
       def notify(report)
+        ;
+      end
+
+      #
+      # Return a hash for notifier configuration
+      #
+      def configure
         ;
       end
 

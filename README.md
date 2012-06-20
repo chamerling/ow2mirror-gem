@@ -35,11 +35,37 @@ This will get the projects and repositories from the source instance ask several
 The create task will create a <project> folder in the mirror folder and will clone all the required stuff. Add git remote and push things.
 It also creates a JSON report file in this folder to keep traces: <project>.json
 
+The create operation does the following git operations:
+
+ 1. Clone the source repository: 'git clone --bare --mirror REPO.git'
+ 2. Add the destination repository as remote 'git remote add github git@github.com:USER/REPO.git'
+
 ### Update a mirror
 
 ow2mirror update
 
-Will retrieve all the projects from the current runtime and call all the required git operation to pull from sources and push to destination
+Will retrieve all the projects from the current runtime and call all the required git operation to pull from sources and push to destination.
+It internally does the following git operations:
+
+1. Fetch from source repository : git fetch --quiet origin
+2. Push to destination repository : git push --quiet github
+
+## Folders
+
+The mirror engine stores git data and additional configuration files into folders. In order to run several mirrors on the same host, the structure is organized as:
+
+- mirror.conf
+  \_ project A
+     \_ project.json
+      _ repos.json
+      _ repository 1
+      _ repository 2
+  \_ project B
+     \_ project.json
+      _ repos.json
+      _ repository 1
+      _ repository 2
+      _ repository 3
 
 ## Contributing
 

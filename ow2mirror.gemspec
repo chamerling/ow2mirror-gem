@@ -7,8 +7,8 @@ Gem::Specification.new do |gem|
 
   gem.authors       = ["Christophe Hamerling"]
   gem.email         = ["christophe.hamerling@ow2.org"]
-  gem.description   = %q{Mirror OW2 repositories to Github}
-  gem.summary       = %q{Mirror OW2 repositories to Github}
+  gem.description   = %q{Mirror Git repositories}
+  gem.summary       = %q{Mirror Git repositories}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($\)
@@ -28,6 +28,9 @@ Gem::Specification.new do |gem|
 
   # XMLparsing (require xml)
   gem.add_dependency('libxml-ruby', "~> 2.3.2")
+
+  # Mail
+  gem.add_dependency('pony', "~> 1.4")
 
   gem.add_development_dependency('mocha', "~> 0.9.9")
   gem.add_development_dependency('rake', "~> 0.9.2")
