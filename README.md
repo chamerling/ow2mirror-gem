@@ -16,15 +16,31 @@ Or install it yourself as:
 
     $ gem install ow2mirror-gem
 
+## Configure
+
+For now, this module clones public source repositories and push to authenticated repositories. It has been initially
+developed to clone repositories from a gitorious instance running on OW2.org and push these repositories to Github.
+
+As a limitation, user have to configure its system and git credentials according to the target system (github in the example).
+
 ## Usage
 
 Ow2mirror comes with a binary used to create required resources and update repositories.
 
-TODO
+- 'ow2mirror install' : Creates all the required resources in the local folder
+- 'ow2mirror create'  : Creates a new mirror (clone the source). This will ask you to give sources and destination informations
+- 'ow2mirror mirror'  : Launches a mirror task which will get changes (fetch) from sources and put them (push) to destinations
+
+### Create a workspace
+
+Workspaces aggregates several mirrors which are potentially coming from different sources. The workspace stores project information, reports, logs, ...
+You can create as many reports as needed acording to your usage. For example, the mirror command will got through all the projects, so creating multiple workspaces can be useful...
+
+Command : 'ow2mirror new'
 
 ### Create a new mirror
 
-ow2mirror create
+Command : 'ow2mirror create'
 
 This will get the projects and repositories from the source instance ask several questions:
  - <project> is the project name from the source instance
@@ -42,7 +58,7 @@ The create operation does the following git operations:
 
 ### Update a mirror
 
-ow2mirror update
+Command : 'ow2mirror mirror'
 
 Will retrieve all the projects from the current runtime and call all the required git operation to pull from sources and push to destination.
 It internally does the following git operations:
@@ -66,6 +82,10 @@ The mirror engine stores git data and additional configuration files into folder
       _ repository 1
       _ repository 2
       _ repository 3
+
+## Limitations
+
+TODO
 
 ## Contributing
 
