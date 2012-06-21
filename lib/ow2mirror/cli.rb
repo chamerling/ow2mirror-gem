@@ -1,6 +1,20 @@
 #
 # Christophe Hamerling - ow2.org
 #
+##
+## Mirror git repositories between git-based systems
+##
+## Usage: ow2mirror [ COMMAND ]
+##
+## Where COMMAND:
+##
+##  - init   : Creates a new workspace to handle multiple mirrors
+##  - create : Creates a new mirror. User will be prompted for settings
+##  - mirror : Mirror the workspace i.e. get all mirrors and call all the git operations to mirror
+##
+##  More details on http://chamerling.github.com/ow2mirror-gem/
+##  @chamerling
+##
 module Ow2mirror
   class Cli
 
@@ -31,6 +45,7 @@ module Ow2mirror
 
       def delegate(command, major, minor)
 
+        return init if command == 'init'
         return install if command == 'install'
         return mirror if command == 'mirror'
         return create if command == 'create'
@@ -47,9 +62,21 @@ module Ow2mirror
       end
 
       #
-      # Create all the required stuff for the Mirror
+      # Configure the system to be ready to mirror ie deals with git credentials...
       #
       def install
+
+        user = ask("git username:")
+        #git config --global user.name "Christophe Hamerling"
+        email = ask('git email:')
+        #git config --global user.email christophe.hamerling@gmail.com
+
+      end
+
+      #
+      # Create all the required stuff for the Mirror
+      #
+      def init
         puts "Creating the default configuration files..."
         ws = Ow2mirror.workspace
         puts ws.create
@@ -146,7 +173,7 @@ module Ow2mirror
       end
 
       def help
-        output "NOP..."
+        output usage
       end
 
       def stdin
@@ -158,6 +185,16 @@ module Ow2mirror
       #
       def test
         puts "TEST METHOD"
+      end
+
+      #
+      # Get usage from comments
+      #
+      def usage
+        File.readlines(__FILE__).
+        grep(/^##.*/).
+        map { |line| line.chomp[3..-1] }.
+        join("\n")
       end
 
     end
