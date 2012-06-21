@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.email         = ["christophe.hamerling@ow2.org"]
   s.description   = %q{Mirror Git repositories}
   s.summary       = %q{Mirror Git repositories}
-  s.homepage      = ""
+  s.homepage      = "http://chamerling.github.com/ow2mirror-gem/"
 
   s.files         = `git ls-files`.split($\)
   s.executables   = s.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
   # Mail
   s.add_dependency('pony', "~> 1.4")
 
-  s.add_development_dependency('mocha', "~> 0.9.9")
+  s.add_development_dependency('mocha', "~> 0.11.4")
   s.add_development_dependency('rake', "~> 0.9.2")
 
   ## Leave this section as-is. It will be automatically generated from the
