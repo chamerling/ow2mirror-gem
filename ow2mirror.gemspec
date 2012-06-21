@@ -24,7 +24,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency('httparty', "~> 0.8.3")
 
   # Input stream management
-  gem.add_dependency('highline', "~> 1.6.12")
+  gem.add_dependency('highline', "~> 1.6.13")
 
   # XMLparsing (require xml)
   gem.add_dependency('libxml-ruby', "~> 2.3.2")
