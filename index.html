@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Ow2mirror-gem by chamerling</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Ow2mirror-gem</h1>
+          <h2>A Ruby Gem to mirror git repositories</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/chamerling/ow2mirror-gem/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/chamerling/ow2mirror-gem/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/chamerling/ow2mirror-gem" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>Ow2mirror::Gem</h1>
+
+<p>Mirror OW2 Gitorious repositories to Github.com organization</p>
+
+<h2>Installation</h2>
+
+<p>Add this line to your application's Gemfile:</p>
+
+<pre><code>gem 'ow2mirror-gem'
+</code></pre>
+
+<p>And then execute:</p>
+
+<pre><code>$ bundle
+</code></pre>
+
+<p>Or install it yourself as:</p>
+
+<pre><code>$ gem install ow2mirror-gem
+</code></pre>
+
+<h2>Configure</h2>
+
+<p>For now, this module clones public source repositories and push to authenticated repositories. It has been initially
+developed to clone repositories from a gitorious instance running on OW2.org and push these repositories to Github.</p>
+
+<p>As a limitation, user have to configure its system and git credentials according to the target system (github in the example).</p>
+
+<h2>Usage</h2>
+
+<p>Ow2mirror comes with a binary used to create required resources and update repositories.</p>
+
+<ul>
+<li>'ow2mirror install' : Creates all the required resources in the local folder</li>
+<li>'ow2mirror create'  : Creates a new mirror (clone the source). This will ask you to give sources and destination informations</li>
+<li>'ow2mirror mirror'  : Launches a mirror task which will get changes (fetch) from sources and put them (push) to destinations</li>
+</ul><h3>Create a workspace</h3>
+
+<p>Workspaces aggregates several mirrors which are potentially coming from different sources. The workspace stores project information, reports, logs, ...
+You can create as many reports as needed acording to your usage. For example, the mirror command will got through all the projects, so creating multiple workspaces can be useful...</p>
+
+<p>Command : 'ow2mirror new'</p>
+
+<h3>Create a new mirror</h3>
+
+<p>Command : 'ow2mirror create'</p>
+
+<p>This will get the projects and repositories from the source instance ask several questions:</p>
+
+<ul>
+<li> is the project name from the source instance</li>
+<li> a list of available repositories from the selected project</li>
+<li> is the target repository prefix name i.e. to differentiate the repositories in the organisation we need to prefix them.
+Short names are better as prefix...</li>
+</ul><p>The create task will create a  folder in the mirror folder and will clone all the required stuff. Add git remote and push things.
+It also creates a JSON report file in this folder to keep traces: .json</p>
+
+<p>The create operation does the following git operations:</p>
+
+<ol>
+<li>Clone the source repository: 'git clone --bare --mirror REPO.git'</li>
+<li>Add the destination repository as remote 'git remote add github <a href="mailto:git@github.com">git@github.com</a>:USER/REPO.git'</li>
+</ol><h3>Update a mirror</h3>
+
+<p>Command : 'ow2mirror mirror'</p>
+
+<p>Will retrieve all the projects from the current runtime and call all the required git operation to pull from sources and push to destination.
+It internally does the following git operations:</p>
+
+<ol>
+<li>Fetch from source repository : git fetch --quiet origin</li>
+<li>Push to destination repository : git push --quiet github</li>
+</ol><h2>Folders</h2>
+
+<p>The mirror engine stores git data and additional configuration files into folders. In order to run several mirrors on the same host, the structure is organized as:</p>
+
+<ul>
+<li>mirror.conf
+_ project A
+ _ project.json
+  _ repos.json
+  _ repository 1
+  _ repository 2
+_ project B
+ _ project.json
+  _ repos.json
+  _ repository 1
+  _ repository 2
+  _ repository 3</li>
+</ul><h2>Limitations</h2>
+
+<p>TODO</p>
+
+<h2>Contributing</h2>
+
+<ol>
+<li>Fork it</li>
+<li>Create your feature branch (<code>git checkout -b my-new-feature</code>)</li>
+<li>Commit your changes (<code>git commit -am 'Added some feature'</code>)</li>
+<li>Push to the branch (<code>git push origin my-new-feature</code>)</li>
+<li>Create new Pull Request</li>
+</ol>
+        </section>
+
+        <footer>
+          Ow2mirror-gem is maintained by <a href="https://github.com/chamerling">chamerling</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
